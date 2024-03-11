@@ -17,15 +17,17 @@ func errorRes(w http.ResponseWriter, err error) {
 	w.Write([]byte(errMessage))
 }
 
-func GetById(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	id := req.PathValue("id")
-	book, err := repo.GetOneById(id)
-	if err != nil {
-		errorRes(w, err)
-		return
+func GetById(env *models.Env) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		id := req.PathValue("id")
+		book, err := repo.GetOneById(id)
+		if err != nil {
+			errorRes(w, err)
+			return
+		}
+		json.NewEncoder(w).Encode(book)
 	}
-	json.NewEncoder(w).Encode(book)
 }
 
 func GetByIsbn(w http.ResponseWriter, req *http.Request) {
@@ -81,7 +83,7 @@ func Update(w http.ResponseWriter, req *http.Request) {
 		errorRes(w, err)
 		return
 	}
-	rowAffected, err :=  repo.Update(book)
+	rowAffected, err := repo.Update(book)
 	if err != nil {
 		errorRes(w, err)
 		return
@@ -99,7 +101,7 @@ func Delete(w http.ResponseWriter, req *http.Request) {
 		errorRes(w, err)
 		return
 	}
-	successMessage := fmt.Sprintf(`{"message": "Deleted %v"}`, rowAffected)
 	w.WriteHeader(http.StatusOK)
+	successMessage := fmt.Sprintf(`{"message": "Deleted %v"}`, rowAffected)
 	w.Write([]byte(successMessage))
 }
